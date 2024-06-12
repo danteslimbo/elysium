@@ -86,13 +86,13 @@ func main() {
 
 	records := make(libs.Records)
 	defer func() {
-		records.PrintRecords(flags.ShowSelf)
+		records.PrintRecords(flags.ShowSelf, flags.Pid, flags.Tid)
 	}()
 
 	var event libs.Event
 	events := coll.Maps["events"]
-	c := time.Tick(time.Duration(flags.Time) * time.Second)
-	_, _ = fmt.Fprintf(os.Stderr, "Fetching %s for %d seconds...\n", flags.Kprobe, flags.Time)
+	c := time.Tick(time.Duration(flags.Interval) * time.Second)
+	_, _ = fmt.Fprintf(os.Stderr, "Fetching %s for %d seconds...\n", flags.Kprobe, flags.Interval)
 	for {
 		for {
 			if err := events.LookupAndDelete(nil, &event); err == nil {
