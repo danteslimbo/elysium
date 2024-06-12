@@ -11,19 +11,20 @@ TODO:
 Usage:
 ```bash
 ./elysium -h
-
 Usage: ./elysium [options]
     Available options:
-  -h, --help            show help
-  -k, --kprobe string   kprobe to be monitored
-  -s, --self elysium    show stat of elysium itself, default `false`
-  -t, --time uint32     set monitor time in seconds
-  -v, --version         show version
+  -h, --help              show help
+  -i, --interval uint32   set monitor time in seconds
+  -k, --kprobe string     kprobe to be monitored
+  -p, --pid uint32        filter pid
+  -s, --self elysium      show stat of elysium itself, default `false`
+  -t, --tid uint32        filter tid
+  -v, --version           show version
 ```
 Example, stat `__x64_sys_read` for 3 seconds,
 and omit the `__x64_sys_read` called from elysium.
 ```bash
-sudo ./elysium -k __x64_sys_read -t 3 
+sudo ./elysium -k __x64_sys_read -i 3 
 
 Fetching __x64_sys_read for 3 seconds...
 Records:
@@ -33,6 +34,15 @@ Tid     Pid     Comm    Count   Ave Latency
 573     569     multipathd      4       4231
 1734246 1734246 sshd    1       4544
 1109    806     containerd      1       4031
+```
+Filter by pid:
+```bash
+sudo ./elysium -k __x64_sys_read -i 3  -p $(pidof containerd)
+
+Fetching __x64_sys_read for 3 seconds...
+Records:
+Tid     Pid     Comm    Count   Ave Latency
+895     806     containerd      4       2786
 ```
 
 ## FAQ

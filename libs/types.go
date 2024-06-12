@@ -12,17 +12,21 @@ type Flags struct {
 	ShowVersion bool
 	ShowHelp    bool
 
-	Time     uint32
+	Interval uint32
 	Kprobe   string
 	ShowSelf bool
+	Pid      uint32
+	Tid      uint32
 }
 
 func (f *Flags) SetFlags() {
 	flag.BoolVarP(&f.ShowVersion, "version", "v", false, "show version")
 	flag.BoolVarP(&f.ShowHelp, "help", "h", false, "show help")
-	flag.Uint32VarP(&f.Time, "time", "t", 0, "set monitor time in seconds")
+	flag.Uint32VarP(&f.Interval, "interval", "i", 0, "set monitor time in seconds")
 	flag.StringVarP(&f.Kprobe, "kprobe", "k", "", "kprobe to be monitored")
 	flag.BoolVarP(&f.ShowSelf, "self", "s", false, "show stat of `elysium` itself, default `false`")
+	flag.Uint32VarP(&f.Pid, "pid", "p", 0, "filter pid")
+	flag.Uint32VarP(&f.Tid, "tid", "t", 0, "filter tid")
 
 	flag.Usage = func() {
 		_, _ = fmt.Fprintf(os.Stderr, "Usage: %s [options] \n", os.Args[0])
@@ -65,7 +69,7 @@ type Record struct {
 
 type Records map[uint32]*Record
 
-func (r Records) PrintRecords(showSelf bool) {
+func (r Records) PrintRecords(showSelf bool, pid, tid uint32) {
 	_, _ = fmt.Fprintln(os.Stderr, "Records:")
 	_, _ = fmt.Fprintln(os.Stderr, "Tid\tPid\tComm\tCount\tAve Latency")
 	records := []*Record{}
@@ -81,6 +85,12 @@ func (r Records) PrintRecords(showSelf bool) {
 			if v.Pid == uint32(selfPid) {
 				continue
 			}
+		}
+		if pid > 0 && v.Pid != pid {
+			continue
+		}
+		if tid > 0 && v.Tid != tid {
+			continue
 		}
 		_, _ = fmt.Fprintf(os.Stderr, "%d\t%d\t%s\t%d\t%d\n", v.Tid, v.Pid, v.Comm, v.Count, v.Latency/v.Count)
 	}
